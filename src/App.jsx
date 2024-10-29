@@ -3,6 +3,10 @@ import "./styles/App.css";
 import axios from "axios";
 import { FaExclamation } from "react-icons/fa6";
 import { FaBars } from "react-icons/fa6";
+import { AiOutlineEllipsis } from "react-icons/ai";
+import { BiSolidObjectsVerticalBottom } from "react-icons/bi";
+import { AiFillSignal } from "react-icons/ai";
+import { Fa1 } from "react-icons/fa6";
 
 function App() {
   const [tickets, setTickets] = useState([]);
@@ -10,14 +14,8 @@ function App() {
   const [processedData, setProcessedData] = useState({});
   const [showOption, setShowOption] = useState(false);
   const [groupingParam, setGroupingParam] = useState("userId");
-  const [sortingParam, setSortingParam] = useState("priority");
-  const priorityMap = [
-    "No priority",
-    "Low",
-    "Medium",
-    "High",
-    "Urgent",
-];
+  const [sortingParam, setSortingParam] = useState("");
+  const priorityMap = ["No priority", "Low", "Medium", "High", "Urgent"];
   function updateShowOption() {
     setShowOption(!showOption);
   }
@@ -67,18 +65,25 @@ function App() {
   useEffect(() => {
     groupingFunc();
   }, [groupingParam, tickets]);
-  console.log(processedData);
 
-  function sortingFunc() {
-    if (sortingParam == "priority") {
-    }
-    if (sortingParam == "title") {
-    }
+  function sortingFunc(data) {
+    return Object.keys(data).reduce((acc, group) => {
+      acc[group] = [...data[group]].sort((a, b) => {
+        if (sortingParam === "priority") {
+          return b.priority - a.priority; // Descending priority
+        } else if (sortingParam === "title") {
+          return a.title.localeCompare(b.title); // Ascending title
+        }
+        return 0;
+      });
+      return acc;
+    }, {});
   }
 
   useEffect(() => {
-    sortingFunc;
+    setProcessedData(sortingFunc(processedData));
   }, [sortingParam]);
+
   return (
     <div className="homepage">
       <button onClick={updateShowOption} className="DisplayBtn">
@@ -110,6 +115,7 @@ function App() {
               setSortingParam(e.target.value);
             }}
           >
+            <option>Select</option>
             <option value="priority">Priority</option>
             <option value="title">Title</option>
           </select>
@@ -135,7 +141,13 @@ function App() {
                     <div className="title">{ticket.title}</div>
                     <div className="tag">
                       <span className="faExclamation">
-                        <FaExclamation />
+                        {ticket.priority == 0 && <AiOutlineEllipsis />}
+                        {ticket.priority == 1 && <Fa1 />}
+                        {ticket.priority == 2 && (
+                          <BiSolidObjectsVerticalBottom />
+                        )}
+                        {ticket.priority == 3 && <AiFillSignal />}
+                        {ticket.priority == 4 && <FaExclamation />}
                       </span>{" "}
                       <span className="ticketTag">{ticket.tag[0]}</span>
                     </div>
